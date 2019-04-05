@@ -10,32 +10,54 @@
  */
 
 #include <epicsGuard.h>
-
 #define epicsExportSharedSymbols
-
 #include <pv/pvDatabase.h>
+#include <pv/pvStructureCopy.h>
+#include <pv/pvPlugin.h>
+#include <pv/pvArrayPlugin.h>
+#include <pv/pvTimestampPlugin.h>
+#include <pv/pvDeadbandPlugin.h>
 
 using std::tr1::static_pointer_cast;
 using namespace epics::pvData;
+using namespace epics::pvCopy;
 using namespace std;
 
 namespace epics { namespace pvDatabase {
+
+#define DEBUG_LEVEL 0
 
 static PVDatabasePtr pvDatabaseMaster;
 
 PVDatabasePtr PVDatabase::getMaster()
 {
-    if(!pvDatabaseMaster) pvDatabaseMaster = PVDatabasePtr(new PVDatabase());  
+    static bool firstTime = true;
+    if(firstTime) {
+        firstTime = false;
+        pvDatabaseMaster = PVDatabasePtr(new PVDatabase());
+        PVArrayPlugin::create();
+        PVTimestampPlugin::create();
+        PVDeadbandPlugin::create();
+    }    
     return pvDatabaseMaster;
 }
 
 PVDatabase::PVDatabase()
 {
+    if(DEBUG_LEVEL>0) cout << "PVDatabase::PVDatabase()\n";
 }
 
 PVDatabase::~PVDatabase()
 {
-cout << "PVDatabase::~PVDatabase()\n";
+    if(DEBUG_LEVEL>0) cout << "PVDatabase::~PVDatabase()\n";
+    size_t len = recordMap.size();
+    shared_vector<string> names(len);
+    PVRecordMap::iterator iter;
+    size_t i = 0;
+    for(iter = recordMap.begin(); iter!=recordMap.end(); ++iter) {
+        names[i++] = (*iter).first;
+    }
+    for(size_t i=0; i<len; ++i) removeRecord(findRecord(names[i]));
 }
 
 void PVDatabase::lock() {
@@ -83,7 +105,6 @@ bool PVDatabase::removeRecord(PVRecordPtr const & record)
     if(iter!=recordMap.end())  {
         PVRecordPtr pvRecord = (*iter).second;
         recordMap.erase(iter);
-        if(pvRecord) pvRecord->destroy();
         return true;
     }
     return false;

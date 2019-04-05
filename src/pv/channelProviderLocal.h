@@ -25,10 +25,10 @@
 #include <pv/lock.h>
 #include <pv/pvType.h>
 #include <pv/pvData.h>
-#include <pv/pvCopy.h>
 #include <pv/pvAccess.h>
 #include <pv/status.h>
 #include <pv/serverContext.h>
+
 
 #ifdef channelProviderLocalEpicsExportSharedSymbols
 #   define epicsExportSharedSymbols
@@ -36,63 +36,23 @@
 #endif
 
 #include <shareLib.h>
-
 #include <pv/pvDatabase.h>
-
+#include <pv/pvStructureCopy.h>
 
 namespace epics { namespace pvDatabase { 
 
-
-class MonitorFactory;
-typedef std::tr1::shared_ptr<MonitorFactory> MonitorFactoryPtr;
-
-class MonitorLocal;
-typedef std::tr1::shared_ptr<MonitorLocal> MonitorLocalPtr;
-
-
 class ChannelProviderLocal;
 typedef std::tr1::shared_ptr<ChannelProviderLocal> ChannelProviderLocalPtr;
+typedef std::tr1::weak_ptr<ChannelProviderLocal> ChannelProviderLocalWPtr;
 class ChannelLocal;
 typedef std::tr1::shared_ptr<ChannelLocal> ChannelLocalPtr;
+typedef std::tr1::weak_ptr<ChannelLocal> ChannelLocalWPtr;
 
-epicsShareFunc MonitorFactoryPtr getMonitorFactory();
 
-/**
- * @brief MonitorFactory
- *
- * This class provides a static method to create a monitor for a PVRecord
- */
-class epicsShareClass MonitorFactory 
-{
-public:
-    POINTER_DEFINITIONS(MonitorFactory);
-    /**
-     * @brief Destructor
-     */
-    virtual ~MonitorFactory();
-    /** 
-     * @brief Create a monitor on a record.
-     *
-     * This is called by the local channel provider.
-     * @param pvRecord The record to monitor.
-     * @param monitorRequester The client callback.
-     * @param pvRequest Options specified by the client.
-     * This includes the subset of the fields in the record to monitor.
-     * @return A shared pointer to the newly created monitor.
-     * If the monitor can not be created a null monitor is returned.
-     * This means the pvRequest specified options that could not be satisfied.
-     */
-    epics::pvData::MonitorPtr createMonitor(
-        PVRecordPtr const & pvRecord,
-        epics::pvData::MonitorRequester::shared_pointer const & monitorRequester,
-        epics::pvData::PVStructurePtr const & pvRequest);
-private:
-    MonitorFactory();
-    friend class MonitorLocal;
-    friend epicsShareFunc MonitorFactoryPtr getMonitorFactory();
-    epics::pvData::Mutex mutex;
-};
-
+epicsShareFunc epics::pvData::MonitorPtr createMonitorLocal(
+    PVRecordPtr const & pvRecord,
+    epics::pvData::MonitorRequester::shared_pointer const & monitorRequester,
+    epics::pvData::PVStructurePtr const & pvRequest);
 
 epicsShareFunc ChannelProviderLocalPtr getChannelProviderLocal();
 
@@ -118,17 +78,19 @@ public:
      */
     virtual ~ChannelProviderLocal();
     /**
-     * @brief Destroy the channel provider.
+     * @brief DEPRECATED
      *
      */
-    virtual void destroy() EPICS_DEPRECATED {};
+    virtual void destroy(){};
     /**
      * @brief Returns the channel provider name.
+     *
      * @return <b>local</b>
      */
     virtual  std::string getProviderName();
     /**
      * @brief Returns either a null channelFind or a channelFind for records in the PVDatabase.
+     *
      * @param channelName The name of the channel desired.
      * @param channelFindRequester The client callback.
      * @return shared pointer to ChannelFind.
@@ -204,11 +166,10 @@ public:
      * @brief ChannelFind method.
      *
      */
-    virtual void cancel();
+    virtual void cancel() {}
 private:
     friend epicsShareFunc ChannelProviderLocalPtr getChannelProviderLocal();
-    PVDatabasePtr pvDatabase;
-    epics::pvData::Mutex mutex;
+    PVDatabaseWPtr pvDatabase;
     int traceLevel;
     friend class ChannelProviderLocalRun;
 };
@@ -241,16 +202,15 @@ public:
      */
     virtual ~ChannelLocal();
     /** 
-     * @brief Destroy the channel.
+     * @brief DEPRECATED
      *
      */
-    virtual void destroy() EPICS_DEPRECATED {};
+    virtual void destroy() {};
     /** 
      * @brief Detach from the record.
      *
      * This is called when a record is being removed from the database.
-     * Calls destroy.
-     * @param pvRecord The record being destroyed.
+     * @param pvRecord The record being removed.
      */
     virtual void detach(PVRecordPtr const &pvRecord);
     /** 
@@ -270,10 +230,7 @@ public:
      * @brief Get the channel provider
      * @return The provider.
      */
-    virtual epics::pvAccess::ChannelProvider::shared_pointer getProvider()
-    {
-        return provider;
-    }
+    virtual epics::pvAccess::ChannelProvider::shared_pointer getProvider();
     /** 
      * @brief Get the remote address
      * @return <b>local</b>
@@ -412,8 +369,8 @@ protected:
     }
 private:
     epics::pvAccess::ChannelRequester::shared_pointer requester;
-    ChannelProviderLocalPtr provider;
-    PVRecordPtr pvRecord;
+    ChannelProviderLocalWPtr provider;
+    PVRecordWPtr pvRecord;
     epics::pvData::Mutex mutex;
 };
 

@@ -37,6 +37,7 @@ using namespace std;
 using std::tr1::static_pointer_cast;
 using namespace epics::pvData;
 using namespace epics::pvAccess;
+using namespace epics::pvCopy;
 using namespace epics::pvDatabase;
 
 static bool debug = false;
@@ -281,7 +282,6 @@ static void scalarTest()
     string request;
     PVStructurePtr pvRequest;
     PVCopyPtr pvCopy;
-    string builder;
     string valueNameRecord;
     string valueNameCopy;
 
@@ -313,7 +313,6 @@ static void scalarTest()
     pvCopy = PVCopy::create(pvRecord->getPVRecordStructure()->getPVStructure(),pvRequest,"");
     valueNameCopy = "value";
     testPVScalar(valueNameRecord,valueNameCopy,pvRecord,pvCopy);
-    pvRecord->destroy();
 }
 
 static void arrayTest()
@@ -324,7 +323,6 @@ static void arrayTest()
     string request;
     PVStructurePtr pvRequest;
     PVCopyPtr pvCopy;
-    string builder;
     string valueNameRecord;
     string valueNameCopy;
 
@@ -350,7 +348,6 @@ static void arrayTest()
     pvCopy = PVCopy::create(pvRecord->getPVRecordStructure()->getPVStructure(),pvRequest,"");
     valueNameCopy = "value";
     testPVScalarArray(valueNameRecord,valueNameCopy,pvRecord,pvCopy);
-    pvRecord->destroy();
 }
 
 static void powerSupplyTest()
@@ -361,7 +358,6 @@ static void powerSupplyTest()
     string request;
     PVStructurePtr pvRequest;
     PVCopyPtr pvCopy;
-    string builder;
     string valueNameRecord;
     string valueNameCopy;
 
@@ -395,7 +391,6 @@ static void powerSupplyTest()
     pvCopy = PVCopy::create(pvRecord->getPVRecordStructure()->getPVStructure(),pvRequest,"");
     valueNameCopy = "power.value";
     testPVScalar(valueNameRecord,valueNameCopy,pvRecord,pvCopy);
-    pvRecord->destroy();
 }
 
 MAIN(testPVCopy)

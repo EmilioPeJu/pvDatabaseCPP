@@ -8,13 +8,14 @@ PVDATABASE_SRC = $(TOP)/src
 LIBRARY += pvDatabase
 
 # shared library ABI version.
-SHRLIB_VERSION ?= 4.3.0
+SHRLIB_VERSION ?= 4.4.1
 
 INC += pv/channelProviderLocal.h
 INC += pv/pvDatabase.h
 INC += pv/traceRecord.h
 INC += pv/removeRecord.h
 
+include $(PVDATABASE_SRC)/copy/Makefile
 include $(PVDATABASE_SRC)/database/Makefile
 include $(PVDATABASE_SRC)/pvAccess/Makefile
 include $(PVDATABASE_SRC)/special/Makefile

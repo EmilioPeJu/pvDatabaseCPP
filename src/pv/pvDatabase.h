@@ -13,12 +13,11 @@
 
 #include <list>
 #include <map>
-#include <deque>
 
 #include <pv/pvData.h>
-#include <pv/pvCopy.h>
 #include <pv/pvTimeStamp.h>
 #include <pv/rpcService.h>
+
 
 #ifdef pvdatabaseEpicsExportSharedSymbols
 #   define epicsExportSharedSymbols
@@ -26,7 +25,7 @@
 #endif
 
 #include <shareLib.h>
-
+#include <pv/pvStructureCopy.h>
 
 namespace epics { namespace pvDatabase { 
 
@@ -46,6 +45,7 @@ typedef std::tr1::weak_ptr<PVRecordStructure> PVRecordStructureWPtr;
 
 class PVRecordClient;
 typedef std::tr1::shared_ptr<PVRecordClient> PVRecordClientPtr;
+typedef std::tr1::weak_ptr<PVRecordClient> PVRecordClientWPtr;
 
 class PVListener;
 typedef std::tr1::shared_ptr<PVListener> PVListenerPtr;
@@ -53,6 +53,7 @@ typedef std::tr1::weak_ptr<PVListener> PVListenerWPtr;
 
 class PVDatabase;
 typedef std::tr1::shared_ptr<PVDatabase> PVDatabasePtr;
+typedef std::tr1::weak_ptr<PVDatabase> PVDatabaseWPtr;
 
 /**
  * @brief Base interface for a PVRecord.
@@ -64,7 +65,7 @@ typedef std::tr1::shared_ptr<PVDatabase> PVDatabasePtr;
  * @date 2012.11.20
  */
 class epicsShareClass PVRecord :
-     public epics::pvData::PVCopyTraverseMasterCallback,
+     public epics::pvCopy::PVCopyTraverseMasterCallback,
      public std::tr1::enable_shared_from_this<PVRecord>
 {
 public:
@@ -97,14 +98,9 @@ public:
      */
     virtual void process();
     /**
-     *  @brief Optional method for derived class.
-     *
-     * Destroy the PVRecord. Release any resources used and 
-     *  get rid of listeners and requesters.
-     *  If derived class overrides this then it must call PVRecord::destroy()
-     *  after it has destroyed any resorces it uses.
+     *  @brief DEPRECATED
      */
-    virtual void destroy();
+    virtual void destroy() {}
     /**
      *  @brief Optional method for derived class.
      *
@@ -112,10 +108,10 @@ public:
      * @param pvRequest The request PVStructure 
      * @return The corresponding service
      */
-    virtual epics::pvAccess::Service::shared_pointer getService(
+    virtual epics::pvAccess::RPCServiceAsync::shared_pointer getService(
         epics::pvData::PVStructurePtr const & pvRequest)
     {
-        return epics::pvAccess::Service::shared_pointer();
+        return epics::pvAccess::RPCServiceAsync::shared_pointer();
     }
     /**
      * @brief Creates a <b>soft</b> record. 
@@ -196,13 +192,6 @@ public:
      */
     bool addPVRecordClient(PVRecordClientPtr const & pvRecordClient);
     /**
-     * @brief Remove a client.
-     *
-     * @param pvRecordClient The client.
-     * @return <b>true</b> if the client is removed.
-     */
-    bool removePVRecordClient(PVRecordClientPtr const & pvRecordClient);
-    /**
      * @brief Add a PVListener.
      *
      * This must be called before calling pvRecordField.addListener.
@@ -212,7 +201,7 @@ public:
      */
     bool addListener(
         PVListenerPtr const & pvListener,
-        epics::pvData::PVCopyPtr const & pvCopy);
+        epics::pvCopy::PVCopyPtr const & pvCopy);
     /**
      *  @brief  PVCopyTraverseMasterCallback method
      *
@@ -228,7 +217,7 @@ public:
      */
     bool removeListener(
         PVListenerPtr const & pvListener,
-        epics::pvData::PVCopyPtr const & pvCopy);
+        epics::pvCopy::PVCopyPtr const & pvCopy);
 
 
     /**
@@ -268,23 +257,22 @@ private:
     PVRecordFieldPtr findPVRecordField(
         PVRecordStructurePtr const & pvrs,
         epics::pvData::PVFieldPtr const & pvField);
+    void notifyClients();
 
     std::string recordName;
     epics::pvData::PVStructurePtr pvStructure;
     PVRecordStructurePtr pvRecordStructure;
     std::list<PVListenerWPtr> pvListenerList;
-    std::list<PVRecordClientPtr> clientList;
+    std::list<PVRecordClientWPtr> clientList;
     epics::pvData::Mutex mutex;
     std::size_t depthGroupPut;
     int traceLevel;
-    bool isDestroyed;
-
-    epics::pvData::PVTimeStamp pvTimeStamp;
-    epics::pvData::TimeStamp timeStamp;
-
     // following only valid while addListener or removeListener is active.
     bool isAddListener;
     PVListenerWPtr pvListener;
+
+    epics::pvData::PVTimeStamp pvTimeStamp;
+    epics::pvData::TimeStamp timeStamp;
 };
 
 epicsShareFunc std::ostream& operator<<(std::ostream& o, const PVRecord& record);
@@ -527,6 +515,7 @@ private:
     void unlock();
     PVRecordMap  recordMap;
     epics::pvData::Mutex mutex;
+    static bool getMasterFirstCall;
 };
 
 }}

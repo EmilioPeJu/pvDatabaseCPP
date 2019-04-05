@@ -28,7 +28,7 @@
 #include <pv/standardField.h>
 #include <pv/standardPVField.h>
 #include <pv/pvData.h>
-#include <pv/pvCopy.h>
+#include <pv/pvStructureCopy.h>
 #define epicsExportSharedSymbols
 #include "powerSupply.h"
 
@@ -37,6 +37,7 @@ using namespace std;
 using std::tr1::static_pointer_cast;
 using namespace epics::pvData;
 using namespace epics::pvDatabase;
+using namespace epics::pvCopy;
 using std::string;
 
 static bool debug = false;
@@ -69,7 +70,6 @@ static void scalarTest()
     if(pvRecord && debug) {
           cout << pvRecord << endl;
     }
-    pvRecord->destroy();
 }
 
 static void arrayTest()
@@ -81,7 +81,6 @@ static void arrayTest()
     if(pvRecord && debug) {
           cout << pvRecord << endl;
     }
-    pvRecord->destroy();
 }
 
 static void powerSupplyTest()
@@ -94,7 +93,6 @@ static void powerSupplyTest()
     if(pvRecord && debug) {
           cout << pvRecord << endl;
     }
-    pvRecord->destroy();
 }
 
 MAIN(testPVRecord)

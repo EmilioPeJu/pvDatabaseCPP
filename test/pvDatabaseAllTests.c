@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <epicsThread.h>
 #include <epicsUnitTest.h>
+#include <epicsExit.h>
 
 /* src */
 int testExampleRecord(void);
 int testPVCopy(void);
+int testPlugin(void);
 int testPVRecord(void);
 int testLocalProvider(void);
 int testPVAServer(void);
@@ -23,8 +25,10 @@ void pvDatabaseAllTests(void)
     /* src */
     runTest(testExampleRecord);
     runTest(testPVCopy);
+    runTest(testPlugin);
     runTest(testPVRecord);
     runTest(testLocalProvider);
     runTest(testPVAServer);
-}
 
+    epicsExit(0);   /* Trigger test harness */
+}

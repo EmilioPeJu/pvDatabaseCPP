@@ -36,7 +36,7 @@
 
 <div class="head">
 <h1>pvDatabaseCPP</h1>
-<h2 class="nocount">Release 4.2-SNAPSHOT - 2016.07.14</h2>
+<h2 class="nocount">Release 4.4 - December 2018</h2>
 
 
 <h2 class="nocount">Abstract</h2>
@@ -60,15 +60,13 @@ The minimum that an extension must provide is a top level PVStructure and a proc
   <h2 class="nocount">Table of Contents</h2>
 </div>
 
-<div id="contents" class="contents">	  
+<div id="contents" class="contents">
 <hr />
 
 <h2>Overview</h2>
 <p>
-pvDatabaseCPP is one of the components of 
-<a href="http://epics-pvdata.sourceforge.net">
-EPICS Version 4
-</a>
+pvDatabaseCPP is one of the components of
+EPICS Version 7
 </p>
 <p>This document is only a guide to help locate code and documentation related to pvDatabaseCPP
 </p>
@@ -78,7 +76,7 @@ It is intended for developers that want to use pvDatabaseCPP.
 <h2>Developer Guide</h2>
 <p>A guide for developers is available at
 <a
-href="http://epics-pvdata.sourceforge.net/informative/developerGuide/developerGuide.html">
+href="https://mrkraimer.github.io/website/developerGuide/developerGuide.html">
 developerGuide
 </a>
 </p>
@@ -86,6 +84,18 @@ developerGuide
 Some understanding of the components and how they are related is necessary in order to
 develop code that uses pvDatabaseCPP.
 In particular read everything related to pvDatabase.
+</p>
+<p>pvDatabase has plugin support, which is implemented in <b>pvCopy</b>.
+<b>pvCopy</b> was originally implemented in <b>pvDataCPP</b>,
+but pvDatabaseCPP now implemnents its own version and adds plugin support.
+</p>
+<p>
+See
+<a
+href="https://mrkraimer.github.io/website/pvRequest/pvRequest.html">
+pvRequest
+</a>
+for details.
 </p>
 <p>The developerGuide discusses code in a way that applies to both CPP and C++.
 For the descriptions of the CPP specific code consult the next section.
@@ -123,7 +133,7 @@ exampleCPP
 <h3>database</h3>
 <p>This has many examples of how to create both soft records and records that implement
 other functionality.</p>
-<dl> 
+<dl>
    <dt>exampleDatabase.cpp</dt>
      <dd>
       This shows how to create soft records of each pvData type.<br />
@@ -148,7 +158,7 @@ other functionality.</p>
 </dl>
 <h3>exampleLink</h3>
 <p>This shows how to implement a record that has a link to another record</p>
-<dl> 
+<dl>
   <dt>exampleMonitorLinkRecord</dt>
      <dd>
       This creates a monitor link to another record.
@@ -169,7 +179,7 @@ provided by iocCore.
 The following provide EPICS V4 shell commands:</p>
 <pre>
 pvAccessCPP
-pvaSrv
+qsrv
 pvDatabaseCPP
 </pre>
 
