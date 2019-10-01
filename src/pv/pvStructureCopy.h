@@ -10,10 +10,6 @@
 #ifndef PVSTRUCTURECOPY_H
 #define PVSTRUCTURECOPY_H
 
-#if defined(_WIN32) && !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-
 #include <string>
 #include <stdexcept>
 #include <memory>
@@ -204,10 +200,16 @@ private:
         epics::pvData::PVFieldPtr const &pvCopy,
         CopyNodePtr const &node,
         epics::pvData::BitSetPtr const &bitSet);
-    void updateMaster(
-        epics::pvData::PVFieldPtr const &pvCopy,
-        CopyNodePtr const &node,
+    void updateMasterField(
+        CopyNodePtr const & node,
+        epics::pvData::PVFieldPtr const & pvCopy,
+        epics::pvData::PVFieldPtr const &pvMaster,
         epics::pvData::BitSetPtr const &bitSet);
+    void updateMasterCheckBitSet(
+        epics::pvData::PVStructurePtr const  &copyPVStructure,
+        epics::pvData::BitSetPtr const  &bitSet,
+        size_t nextSet);
+    CopyNodePtr getCopyNode(std::size_t fieldOffset);
 
     PVCopy(epics::pvData::PVStructurePtr const &pvMaster);
     bool init(epics::pvData::PVStructurePtr const &pvRequest);
@@ -239,7 +241,6 @@ private:
         std::string *builder,
         CopyNodePtr const &node,
         int indentLevel);
-    friend class PVCopyMonitor;
 };
 
 }}
